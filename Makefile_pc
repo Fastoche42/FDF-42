@@ -1,0 +1,69 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: fl-hote <marvin@42.fr>                     +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2022/11/13 12:54:29 by fl-hote           #+#    #+#              #
+#    Updated: 2022/11/13 18:19:30 by fl-hote          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+NAME	= fdf
+
+SRC_PATH	= ./srcs/
+OBJ_PATH	= ./objs/
+CPPFLAGS	= -I./includes/
+HEADERS		= -I./includes/ -I./libft/ -I./MLX42/include/
+
+SRC_NAME 	= main.c fdf.c fdf_utils.c
+OBJ_NAME 	= $(SRC_NAME:.c=.o)
+
+SRC	= $(addprefix $(SRC_PATH),$(SRC_NAME))
+OBJ	= $(addprefix $(OBJ_PATH),$(OBJ_NAME))
+
+LIBFT	= ./libft/libft.a
+LDFLAGS	= -L./libft/
+LFT		= -lft
+
+
+CFLAGS	= -Wall -Wextra -Werror -Wunreachable-code -Ofast
+CC		= gcc
+
+UNAME := $(shell uname -s)
+ifeq ($(UNAME), Darwin)
+	MLX = ./MLX42/libmlx42.a -lglfw -framework Cocoa -framework OpenGL -framework IOKit -L /Users/${USER}/goinfre/.brew/opt/glfw/lib/
+else
+	MLX = ./MLX42/libmlx42.a -ldl -lglfw -pthread -lm
+endif
+
+# rules
+
+all: $(NAME)
+
+$(NAME): $(OBJ)
+	@make -C ./libft/
+#	@make -C ./MLX42
+	@$(CC) $(LDFLAGS) $(LFT) $(OBJ) -o $@ $(MLX) $(LIBFT)
+
+$(OBJ_PATH)%.o: $(SRC_PATH)%.c
+	@mkdir $(OBJ_PATH) 2> /dev/null || true
+	$(CC) $(CFLAGS) $(HEADERS) -o $@ -c $<
+
+clean:
+	@make -C ./libft/ clean
+#	@make -C ./MLX42 clean
+	@rm -f $(OBJ)
+	@rmdir $(OBJ_PATH) 2> /dev/null || true
+
+fclean:
+	@make -C ./libft/ fclean
+#	@make -C ./MLX42 fclean
+	@rm -f $(OBJ)
+	@rmdir $(OBJ_PATH) 2> /dev/null || true
+	rm -f $(NAME)
+
+re: fclean all
+
+.PHONY: all clean fclean re
